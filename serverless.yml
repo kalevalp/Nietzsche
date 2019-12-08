@@ -1,13 +1,13 @@
-tenant: rpidanny
-app: nietzsche
+# tenant: rpidanny
+# app: nietzsche
 service: nietzsche
 
 plugins:
-  - serverless-offline
+  # - serverless-offline
   - serverless-step-functions
-  - serverless-pseudo-parameters
-  - serverless-plugin-include-dependencies
-  - serverless-plugin-optimize
+  # - serverless-pseudo-parameters
+  # - serverless-plugin-include-dependencies
+  # - serverless-plugin-optimize
 
 package:
   individually: true
@@ -21,7 +21,7 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
   profile: default
   region: eu-west-1
   versionFunctions: false
@@ -71,39 +71,44 @@ functions:
   - ${file(functions/getRandomQuote.yml)}
   - ${file(functions/incrementUsedCounter.yml)}
   - ${file(functions/decideTweetMode.yml)}
+  - ${file(watchtower/functions.yml)}
 
 resources:
-  Resources:
-    quotesDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: author
-            AttributeType: S
-          - AttributeName: quoteId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: author
-            KeyType: HASH
-          - AttributeName: quoteId
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
-    pagesSNSTopic:
-      Type: AWS::SNS::Topic
-      Properties: 
-        DisplayName: ${self:provider.environment.SNS_SCRAP_TOPIC}
-        TopicName: ${self:provider.environment.SNS_SCRAP_TOPIC}
-    quotesQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        MessageRetentionPeriod: 345600
-        QueueName: ${self:provider.environment.SQS_QUOTES}
-        ReceiveMessageWaitTimeSeconds: 1
-        VisibilityTimeout: 300
+  - ${file(watchtower/outputs.yml)}
+  - ${file(watchtower/ddbTables.yml)}
+  - ${file(watchtower/kinesisStreams.yml)}
+  - ${file(watchtower/iamRoles.yml)}
+  - Resources:
+      quotesDynamoDbTable:
+        Type: 'AWS::DynamoDB::Table'
+        DeletionPolicy: Retain
+        Properties:
+          AttributeDefinitions:
+            - AttributeName: author
+              AttributeType: S
+            - AttributeName: quoteId
+              AttributeType: S
+          KeySchema:
+            - AttributeName: author
+              KeyType: HASH
+            - AttributeName: quoteId
+              KeyType: RANGE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+          TableName: ${self:provider.environment.DYNAMODB_TABLE}
+      pagesSNSTopic:
+        Type: AWS::SNS::Topic
+        Properties: 
+          DisplayName: ${self:provider.environment.SNS_SCRAP_TOPIC}
+          TopicName: ${self:provider.environment.SNS_SCRAP_TOPIC}
+      quotesQueue:
+        Type: AWS::SQS::Queue
+        Properties:
+          MessageRetentionPeriod: 345600
+          QueueName: ${self:provider.environment.SQS_QUOTES}
+          ReceiveMessageWaitTimeSeconds: 1
+          VisibilityTimeout: 300
 
 custom:
   optimize:
@@ -111,6 +116,28 @@ custom:
 
 stepFunctions:
   stateMachines:
+    ##########################################
+    ## Watchtower Checker State Machine
+    ##
+    checker:
+      name: wtCheckerMachine
+      definition:
+        Comment: "Watchtower property checker state machine."
+        StartAt: WaitToStable
+        States:
+          WaitToStable:
+            Type : Wait
+            SecondsPath : $.stabilityDelay
+            Next: StableCheckerRun
+          StableCheckerRun:
+            Type: Task
+            Comment: "Second/Stable execution of the checker."
+            Resource:
+              Fn::GetAtt: [watchtower-monitor, Arn]
+            End: true
+    ##
+    ## End of Watchtower Checker State Machine
+    ##########################################
     tweetQuote:
       name: ${self:service}-${opt:stage}-tweetQuoteStateMachine
       events:

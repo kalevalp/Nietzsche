@@ -24,7 +24,7 @@
     "serverless-plugin-include-dependencies": "^3.2.1",
     "serverless-plugin-optimize": "^4.0.2-rc.1",
     "serverless-pseudo-parameters": "^2.4.0",
-    "serverless-step-functions": "^1.17.0",
+    "serverless-step-functions": "^1.25.0",
     "standard": "^12.0.1"
   },
   "dependencies": {
@@ -32,6 +32,9 @@
     "cheerio": "^1.0.0-rc.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
-    "twit": "^2.2.11"
+    "twit": "^2.2.11",
+    "watchtower-log-ingestion": "^1.10.1",
+    "watchtower-monitor": "^1.8.3",
+    "watchtower-recorder": "^1.10.1"
   }
 }
