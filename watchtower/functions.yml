@@ -55,7 +55,9 @@ wt-monitor-trigger:
       enabled: true
       startingPosition: TRIM_HORIZON
   environment:
-    WATCHTOWER_CHECKER_SM_ARN: ${self:resources[0].Outputs.WTCheckerMachine.Value}
+    # WATCHTOWER_CHECKER_SM_ARN:
+    #   'Fn::GetAtt': [ WtCheckerMachineArn, Arn ]
+    WATCHTOWER_CHECKER_SM_ARN: ${self:resources.Outputs.WTCheckerMachine.Value}
   role:
     'Fn::GetAtt': [ StateMachineListExec, Arn ]
 ##

@@ -1,7 +1,7 @@
 ##########################################
 ## Watchtower Checker State Machine
 ##
-stateMachines: 
+stateMachines:
   checker:
     name: wtCheckerMachine
     definition:
@@ -21,4 +21,3 @@ stateMachines:
 ##
 ## End of Watchtower Checker State Machine
 ##########################################
-  

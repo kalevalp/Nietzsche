@@ -1,13 +1,11 @@
-# tenant: rpidanny
-# app: nietzsche
 service: nietzsche
 
 plugins:
-  # - serverless-offline
+  - serverless-offline
   - serverless-step-functions
-  # - serverless-pseudo-parameters
-  # - serverless-plugin-include-dependencies
-  # - serverless-plugin-optimize
+  - serverless-pseudo-parameters
+  - serverless-plugin-include-dependencies
+  - serverless-plugin-optimize
 
 package:
   individually: true
@@ -62,53 +60,60 @@ provider:
       Resource: { "Fn::Join" : ["", ["arn:aws:sqs:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:provider.environment.SQS_QUOTES}" ] ]  }
 
 functions:
-  - ${file(functions/dispatchScrappers.yml)}
-  - ${file(functions/scrapQuotes.yml)}
-  - ${file(functions/saveQuotes.yml)}
-  - ${file(functions/tweetQuoteText.yml)}
-  - ${file(functions/tweetQuoteImage.yml)}
-  - ${file(functions/getQuotesByAuthor.yml)}
-  - ${file(functions/getRandomQuote.yml)}
-  - ${file(functions/incrementUsedCounter.yml)}
-  - ${file(functions/decideTweetMode.yml)}
-  - ${file(watchtower/functions.yml)}
+  dispatchScrappers: ${file(functions/dispatchScrappers.yml):dispatchScrappers}
+  scrapQuotes: ${file(functions/scrapQuotes.yml):scrapQuotes}
+  saveQuotes: ${file(functions/saveQuotes.yml):saveQuotes}
+  tweetQuoteText: ${file(functions/tweetQuoteText.yml):tweetQuoteText}
+  tweetQuoteImage: ${file(functions/tweetQuoteImage.yml):tweetQuoteImage}
+  getQuotesByAuthor: ${file(functions/getQuotesByAuthor.yml):getQuotesByAuthor}
+  getRandomQuote: ${file(functions/getRandomQuote.yml):getRandomQuote}
+  incrementUsedCounter: ${file(functions/incrementUsedCounter.yml):incrementUsedCounter}
+  decideTweetMode: ${file(functions/decideTweetMode.yml):decideTweetMode}
+  watchtower-ingestion: ${file(watchtower/functions.yml):watchtower-ingestion}
+  watchtower-monitor: ${file(watchtower/functions.yml):watchtower-monitor}
+  wt-monitor-trigger: ${file(watchtower/functions.yml):wt-monitor-trigger}
 
 resources:
-  - ${file(watchtower/outputs.yml)}
-  - ${file(watchtower/ddbTables.yml)}
-  - ${file(watchtower/kinesisStreams.yml)}
-  - ${file(watchtower/iamRoles.yml)}
-  - Resources:
-      quotesDynamoDbTable:
-        Type: 'AWS::DynamoDB::Table'
-        DeletionPolicy: Retain
-        Properties:
-          AttributeDefinitions:
-            - AttributeName: author
-              AttributeType: S
-            - AttributeName: quoteId
-              AttributeType: S
-          KeySchema:
-            - AttributeName: author
-              KeyType: HASH
-            - AttributeName: quoteId
-              KeyType: RANGE
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-          TableName: ${self:provider.environment.DYNAMODB_TABLE}
-      pagesSNSTopic:
-        Type: AWS::SNS::Topic
-        Properties: 
-          DisplayName: ${self:provider.environment.SNS_SCRAP_TOPIC}
-          TopicName: ${self:provider.environment.SNS_SCRAP_TOPIC}
-      quotesQueue:
-        Type: AWS::SQS::Queue
-        Properties:
-          MessageRetentionPeriod: 345600
-          QueueName: ${self:provider.environment.SQS_QUOTES}
-          ReceiveMessageWaitTimeSeconds: 1
-          VisibilityTimeout: 300
+  Resources:
+    EventsTable: ${file(watchtower/ddbTables.yml):Resources.EventsTable}
+    CheckpointsTable: ${file(watchtower/ddbTables.yml):Resources.CheckpointsTable}
+    InvocationStream: ${file(watchtower/kinesisStreams.yml):Resources.InvocationStream}
+    EventsStream: ${file(watchtower/kinesisStreams.yml):Resources.EventsStream}
+    EventWriterRole: ${file(watchtower/iamRoles.yml):Resources.EventWriterRole}
+    EventReaderRole: ${file(watchtower/iamRoles.yml):Resources.EventReaderRole}
+    StateMachineListExec: ${file(watchtower/iamRoles.yml):Resources.StateMachineListExec}
+    quotesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      # DeletionPolicy: Retain ## kalevalp: got tired of manually deleting this table every time
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: author
+            AttributeType: S
+          - AttributeName: quoteId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: author
+            KeyType: HASH
+          - AttributeName: quoteId
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    pagesSNSTopic:
+      Type: AWS::SNS::Topic
+      Properties: 
+        DisplayName: ${self:provider.environment.SNS_SCRAP_TOPIC}
+        TopicName: ${self:provider.environment.SNS_SCRAP_TOPIC}
+    quotesQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        MessageRetentionPeriod: 345600
+        QueueName: ${self:provider.environment.SQS_QUOTES}
+        ReceiveMessageWaitTimeSeconds: 1
+        VisibilityTimeout: 300
+  Outputs:
+    WTCheckerMachine: ${file(watchtower/outputs.yml):Outputs.WTCheckerMachine}
 
 custom:
   optimize:
@@ -116,28 +121,7 @@ custom:
 
 stepFunctions:
   stateMachines:
-    ##########################################
-    ## Watchtower Checker State Machine
-    ##
-    checker:
-      name: wtCheckerMachine
-      definition:
-        Comment: "Watchtower property checker state machine."
-        StartAt: WaitToStable
-        States:
-          WaitToStable:
-            Type : Wait
-            SecondsPath : $.stabilityDelay
-            Next: StableCheckerRun
-          StableCheckerRun:
-            Type: Task
-            Comment: "Second/Stable execution of the checker."
-            Resource:
-              Fn::GetAtt: [watchtower-monitor, Arn]
-            End: true
-    ##
-    ## End of Watchtower Checker State Machine
-    ##########################################
+    checker: ${file(watchtower/stateMachine.yml):stateMachines.checker}
     tweetQuote:
       name: ${self:service}-${opt:stage}-tweetQuoteStateMachine
       events:
