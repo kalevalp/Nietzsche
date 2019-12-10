@@ -1,6 +1,6 @@
 
 scrapQuotes:
-  handler: src/scrapQuotes.handler
+  handler: src/scrapQuotes${self:custom.handlerFilePostfix}.handler
   description: Scrap quotes and push to to SQS
   memorySize: 512
   events:

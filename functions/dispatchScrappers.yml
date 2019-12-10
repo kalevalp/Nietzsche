@@ -1,6 +1,6 @@
 
 dispatchScrappers:
-  handler: src/dispatchScrappers.handler
+  handler: src/dispatchScrappers${self:custom.handlerFilePostfix}.handler
   description: Dispatch Scrapper Functions
   memorySize: 256
   environment:

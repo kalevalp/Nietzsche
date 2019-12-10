@@ -1,6 +1,6 @@
 
 getQuotesByAuthor:
-  handler: src/getQuotesByAuthor.handler
+  handler: src/getQuotesByAuthor${self:custom.handlerFilePostfix}.handler
   description: Get list of quotes by an Author.
   events:
     - http:

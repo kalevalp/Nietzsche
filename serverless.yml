@@ -8,14 +8,15 @@ plugins:
   - serverless-plugin-optimize
 
 package:
-  individually: true
-  include:
-    - src/assets/**/*
-  exclude:
-    - node_modules/**
-    - README.md
-    - package.json
-    - package-lock.json
+  # individually: true
+  excludeDevDependencies: false
+#   # include:
+#   #   - src/assets/**/*
+#   exclude:
+#     # - node_modules/**
+#     - README.md
+#     - package.json
+#     - package-lock.json
 
 provider:
   name: aws
@@ -35,6 +36,13 @@ provider:
     SNS_SCRAP_TOPIC: ${self:service}-${opt:stage, self:provider.stage}-scrap
     SQS_QUOTES: ${self:service}-${opt:stage, self:provider.stage}-quotes
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource:
+        - arn:aws:logs:*:*:*
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -118,6 +126,9 @@ resources:
 custom:
   optimize:
     includePaths: ['src/assets']
+  # handlerFilePostfix: '-wrapper'
+  # handlerFilePostfix: ''
+  handlerFilePostfix: ${env:WT_RUN_NO_RECORDING, '-wrapper'}
 
 stepFunctions:
   stateMachines:

@@ -1,6 +1,6 @@
 
 tweetQuoteText:
-  handler: src/tweetQuoteText.handler
+  handler: src/tweetQuoteText${self:custom.handlerFilePostfix}.handler
   description: Tweet quote as text.
   environment:
     TWITTER_CONSUMER_KEY: "dummy" # ${ssm:nietzsche-twitter-consumer-key}

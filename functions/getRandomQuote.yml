@@ -1,6 +1,6 @@
 
 getRandomQuote:
-  handler: src/getRandomQuote.handler
+  handler: src/getRandomQuote${self:custom.handlerFilePostfix}.handler
   description: Tweet a random quote.
   memorySize: 128
   timeout: 300

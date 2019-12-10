@@ -1,6 +1,6 @@
 
 tweetQuoteImage:
-  handler: src/tweetQuoteImage.handler
+  handler: src/tweetQuoteImage${self:custom.handlerFilePostfix}.handler
   description: Tweet quote as image.
   environment:
     TWITTER_CONSUMER_KEY: "dummy" #${ssm:nietzsche-twitter-consumer-key}

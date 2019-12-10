@@ -1,6 +1,6 @@
 
 saveQuotes:
-  handler: src/saveQuotes.handler
+  handler: src/saveQuotes${self:custom.handlerFilePostfix}.handler
   description: Save quote to DynamoDB
   memorySize: 128
   events:
