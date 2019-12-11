@@ -1,3 +1,10 @@
+/* ********************************************************************************
+ *
+ * Property:
+ *   If a quote was tweeted, then that quote was previously scraped by the scraper.
+ *   (rationale - in case someone injected an unwanted tweet to the database.)
+ *
+ * ******************************************************************************** */
 const properties = [
     {
         name: 'genprop',

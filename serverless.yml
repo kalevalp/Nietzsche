@@ -4,23 +4,23 @@ plugins:
   - serverless-offline
   - serverless-step-functions
   - serverless-pseudo-parameters
-  - serverless-plugin-include-dependencies
-  - serverless-plugin-optimize
+  # - serverless-plugin-include-dependencies
+  # - serverless-plugin-optimize
 
-package:
-  # individually: true
-  excludeDevDependencies: false
-#   # include:
-#   #   - src/assets/**/*
-#   exclude:
-#     # - node_modules/**
-#     - README.md
-#     - package.json
-#     - package-lock.json
+# package:
+#   # individually: true
+#   excludeDevDependencies: false
+# #   # include:
+# #   #   - src/assets/**/*
+# #   exclude:
+# #     # - node_modules/**
+# #     - README.md
+# #     - package.json
+# #     - package-lock.json
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs10.x
   profile: default
   region: eu-west-1
   versionFunctions: false
@@ -135,16 +135,16 @@ stepFunctions:
     checker: ${file(watchtower/stateMachine.yml):stateMachines.checker}
     tweetQuote:
       name: ${self:service}-${opt:stage}-tweetQuoteStateMachine
-      events:
-        - schedule:
-            rate: cron(30 16 * * ? *)
-            enabled: true
-        - schedule:
-            rate: cron(30 07 * * ? *)
-            enabled: true
-        - schedule:
-            rate: cron(15 00 * * ? *)
-            enabled: true
+      # events:
+      #   - schedule:
+      #       rate: cron(30 16 * * ? *)
+      #       enabled: true
+      #   - schedule:
+      #       rate: cron(30 07 * * ? *)
+      #       enabled: true
+      #   - schedule:
+      #       rate: cron(15 00 * * ? *)
+      #       enabled: true
       definition:
         Comment: "Tweets random quote."
         StartAt: GET_RANDOM_QUOTE
