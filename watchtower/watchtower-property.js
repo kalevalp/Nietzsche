@@ -8,20 +8,16 @@
 const properties = [
     {
         name: 'genprop',
-        quantifiedVariables: ['target_uuid'],
-        projections: [['target_uuid']],
+        quantifiedVariables: ['quoteId'],
+        projections: [['quoteId']],
         stateMachine: {
-            'ADDED_TARGET': {
-                params: [ 'target_uuid' ],
-                'INITIAL' : { to: 'has_target' },
+            'PUBLISHED_TWEET': {
+                params: [ 'quoteId' ],
+                'INITIAL' : { to: 'FAILURE' },
             },
-	    'REMOVED_TARGET': {
-		params: [ 'target_uuid' ],
-		'has_target' : { to: 'INITIAL' },
-	    },
-	    'CHECKED_TARGET': {
-		params: [ 'target_uuid' ],
-		'INITIAL' : { to: 'FAILURE' },
+	    'SCRAPED_QUOTE': {
+		params: [ 'quoteId' ],
+		'INITIAL' : { to: 'scraped' },
 	    },
         }
     },
