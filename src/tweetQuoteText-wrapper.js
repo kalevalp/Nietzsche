@@ -18,7 +18,7 @@ const mock = {
     'aws-sdk' : aws,
     'request' : request,
     'request-promise' : rp,
-    'twit' : recorder.createTwitMock([]),
+    'twit' : recorder.createTwitMock(twitConditions),
 };
 
 module.exports.handler = recorder.createRecordingHandler('src/tweetQuoteText.js', 'handler', mock, false, updateContext, true);
