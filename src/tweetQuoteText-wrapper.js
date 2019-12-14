@@ -12,7 +12,7 @@ let context, lambdaExecutionContext, lambdaInputEvent;
 function updateContext(name, event, lambdaContext) { context = name; lambdaExecutionContext = lambdaContext; lambdaInputEvent = event; }
 
 const twitConditions = [{ cond: () => true, 
-                          opInSucc: (argumentsList) => (response) => eventPublisher({name: "PUBLISHED_TWEET", params: {quoteID: lambdaInputEvent.quoteId}})}]
+                          opInSucc: (argumentsList) => (response) => eventPublisher({name: "PUBLISHED_TWEET", params: {quoteId: lambdaInputEvent.quoteId}}, lambdaExecutionContext)}]
 
 const mock = {
     'aws-sdk' : aws,

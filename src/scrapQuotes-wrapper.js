@@ -30,7 +30,7 @@ const mock = {
         fetchQuotes: (...args) => {
             gru.fetchQuotes(...args)
                 .then(quotes => {
-                    const logEvents = quotes.map(quote => ({name: "SCRAPED_QUOTE", params: {quoteID: md5(`${quote.author}-${quote.text}`)}}));
+                    const logEvents = quotes.map(quote => ({name: "SCRAPED_QUOTE", params: {quoteId: md5(`${quote.author}-${quote.text}`)}}));
                     batchEventPublisher(logEvents,lambdaExecutionContext);
                 })
         },
