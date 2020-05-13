@@ -34,7 +34,7 @@
     "request-promise": "^4.2.2",
     "twit": "^2.2.11",
     "watchtower-log-ingestion": "^1.10.1",
-    "watchtower-monitor": "^1.8.3",
-    "watchtower-recorder": "^1.11.5"
+    "watchtower-monitor": "^1.9.0",
+    "watchtower-recorder": "^2.7.3"
   }
 }

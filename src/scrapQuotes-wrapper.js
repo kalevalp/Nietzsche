@@ -27,13 +27,15 @@ const mock = {
     'request-promise': rp,
     'cheerio': cheerio,
     './utils/goodreads': {
-        fetchQuotes: (...args) => {
-            gru.fetchQuotes(...args)
-                .then(quotes => {
-                    const logEvents = quotes.map(quote => ({name: "SCRAPED_QUOTE", params: {quoteId: md5(`${quote.author}-${quote.text}`)}}));
-                    batchEventPublisher(logEvents,lambdaExecutionContext);
-                })
-        },
+        fetchQuotes: (...args) =>
+            gru
+            .fetchQuotes(...args)
+            .then(quotes => {
+                const logEvents = quotes.map(quote => ({name: "SCRAPED_QUOTE", params: {quoteId: md5(`${quote.author}-${quote.text}`)}}));
+                batchEventPublisher(logEvents,lambdaExecutionContext);
+                return quotes;
+            })
+        ,
     }
 };
 
